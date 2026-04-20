@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String   @id @default(cuid())
+  clerkId          String   @unique
+  username         String   @unique
+  email            String   @unique
+  rating           Int      @default(1200)
+  ratingDeviation  Float    @default(350)
+  volatility       Float    @default(0.06)
+  wins             Int      @default(0)
+  losses           Int      @default(0)
+  draws            Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  matchesAsPlayer1 Match[]  @relation("Player1Matches")
+  matchesAsPlayer2 Match[]  @relation("Player2Matches")
+  wonMatches       Match[]  @relation("WonMatches")
+
+  @@index([rating])
+  @@index([clerkId])
+}
+
+model Question {
+  id             String          @id @default(cuid())
+  latexQuestion  String
+  options        String[]
+  correctOption  Int
+  subject        Subject
+  topic          String
+  difficulty     Difficulty
+  year           Int?
+  source         QuestionSource
+  explanation    String?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+
+  matchQuestions MatchQuestion[]
+
+  @@index([subject, difficulty])
+  @@index([isActive])
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  player1Id   String
+  player2Id   String
+  winnerId    String?
+  status      MatchStatus @default(IN_PROGRESS)
+  ratingDelta Int         @default(0)
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+
+  player1        User            @relation("Player1Matches", fields: [player1Id], references: [id])
+  player2        User            @relation("Player2Matches", fields: [player2Id], references: [id])
+  winner         User?           @relation("WonMatches", fields: [winnerId], references: [id])
+  matchQuestions MatchQuestion[]
+
+  @@index([player1Id])
+  @@index([player2Id])
+  @@index([createdAt])
+}
+
+model MatchQuestion {
+  id            String   @id @default(cuid())
+  matchId       String
+  questionId    String
+  questionIndex Int
+  player1Answer Int?
+  player2Answer Int?
+  firstCorrect  String?
+  createdAt     DateTime @default(now())
+
+  match    Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@unique([matchId, questionIndex])
+  @@index([matchId])
+}
+
+enum Subject {
+  PHYSICS
+  CHEMISTRY
+  MATHEMATICS
+  BIOLOGY
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum MatchStatus {
+  WAITING
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+enum QuestionSource {
+  JEE_MAINS
+  JEE_ADVANCED
+  NEET
+  CUSTOM
+}

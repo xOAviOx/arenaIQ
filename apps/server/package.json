@@ -1,0 +1,30 @@
+{
+  "name": "@arenaiq/server",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/src/index.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@arenaiq/db": "*",
+    "@arenaiq/types": "*",
+    "@upstash/redis": "^1.31.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.0",
+    "glicko2": "^1.2.5",
+    "socket.io": "^4.7.0",
+    "dotenv": "^16.4.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.0",
+    "ts-node": "^10.9.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.0"
+  }
+}
