@@ -14,7 +14,7 @@
     "@upstash/redis": "^1.31.0",
     "cors": "^2.8.5",
     "express": "^4.19.0",
-    "glicko2": "^1.2.5",
+    "glicko2": "^1.2.1",
     "socket.io": "^4.7.0",
     "dotenv": "^16.4.0",
     "zod": "^3.23.0"

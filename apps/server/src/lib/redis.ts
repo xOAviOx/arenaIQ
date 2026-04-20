@@ -48,5 +48,7 @@ export async function getPlayersInRatingRange(
   rating: number,
   window: number,
 ): Promise<string[]> {
-  return redis.zrangebyscore(QUEUE_KEY, rating - window, rating + window);
+  return redis.zrange(QUEUE_KEY, rating - window, rating + window, {
+    byScore: true,
+  });
 }

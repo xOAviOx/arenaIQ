@@ -653,7 +653,7 @@ async function main() {
       create: {
         id: `seed-${q.topic.replace(/\s+/g, '-').toLowerCase()}-${q.year ?? 'na'}-${questions.indexOf(q)}`,
         latexQuestion: q.latexQuestion,
-        options: q.options as string[],
+        options: Array.from(q.options),
         correctOption: q.correctOption,
         subject: q.subject as any,
         topic: q.topic,
