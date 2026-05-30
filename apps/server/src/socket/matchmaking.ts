@@ -15,26 +15,38 @@ export function registerMatchmakingHandlers(io: IoType, socket: SocketType): voi
   socket.on('join_queue', async ({ userId, rating }) => {
     socket.data.userId = userId;
 
-    await enqueuePlayer(io, {
-      userId,
-      socketId: socket.id,
-      rating,
-      joinedAt: Date.now(),
-      ratingWindow: config.matchmaking.initialRatingWindow,
-    });
-
-    console.log(`Player ${userId} joined queue with rating ${rating}`);
+    try {
+      await enqueuePlayer(io, {
+        userId,
+        socketId: socket.id,
+        rating,
+        joinedAt: Date.now(),
+        ratingWindow: config.matchmaking.initialRatingWindow,
+      });
+      console.log(`Player ${userId} joined queue with rating ${rating}`);
+    } catch (err) {
+      console.error(`join_queue failed for ${userId}:`, err);
+      socket.emit('error', 'Failed to join the matchmaking queue. Please try again.');
+    }
   });
 
   socket.on('leave_queue', async ({ userId }) => {
-    await dequeuePlayer(userId);
-    console.log(`Player ${userId} left queue`);
+    try {
+      await dequeuePlayer(userId);
+      console.log(`Player ${userId} left queue`);
+    } catch (err) {
+      console.error(`leave_queue failed for ${userId}:`, err);
+    }
   });
 
   socket.on('disconnect', async () => {
     const userId = socket.data.userId;
     if (userId && !socket.data.roomId) {
-      await dequeuePlayer(userId);
+      try {
+        await dequeuePlayer(userId);
+      } catch (err) {
+        console.error(`disconnect cleanup failed for ${userId}:`, err);
+      }
     }
   });
 }
