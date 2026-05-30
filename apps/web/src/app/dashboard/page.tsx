@@ -8,6 +8,9 @@ import { UserProfile } from '@arenaiq/types';
 import Link from 'next/link';
 import { Trophy, LayoutDashboard } from 'lucide-react';
 
+// Always render fresh so rating/stats reflect the latest completed match.
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const clerkUser = await currentUser();
   if (!clerkUser) redirect('/login');

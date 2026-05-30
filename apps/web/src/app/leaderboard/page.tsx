@@ -6,6 +6,9 @@ import { getTier } from '@/lib/utils';
 import Link from 'next/link';
 import { Trophy, ArrowLeft } from 'lucide-react';
 
+// Always render fresh so standings reflect the latest ratings.
+export const dynamic = 'force-dynamic';
+
 export default async function LeaderboardPage() {
   const clerkUser = await currentUser();
   const dbUser = clerkUser

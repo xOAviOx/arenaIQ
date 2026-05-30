@@ -11,6 +11,9 @@ import { Subject } from '@arenaiq/types';
 import { Trophy, RotateCcw, Home, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Always render fresh so the result/breakdown reflects the just-completed match.
+export const dynamic = 'force-dynamic';
+
 export default async function ResultPage({ params }: { params: { matchId: string } }) {
   const clerkUser = await currentUser();
   const match = await prisma.match.findUnique({
