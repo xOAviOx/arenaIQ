@@ -222,17 +222,21 @@ function resolveQuestion(io: IoType, roomId: string, questionIndex: number): voi
   emitResult(room.player1.socketId, 'player1');
   emitResult(room.player2.socketId, 'player2');
 
-  // Save to DB async
-  void prisma.matchQuestion.create({
-    data: {
-      matchId: room.matchId,
-      questionId: question.id,
-      questionIndex,
-      player1Answer: existing.player1 ?? null,
-      player2Answer: existing.player2 ?? null,
-      firstCorrect: existing.firstCorrect ?? null,
-    },
-  });
+  // Save to DB async. NOTE: a Prisma query is a lazy PrismaPromise — it only
+  // runs when awaited or chained with .then/.catch. A bare `void prisma...` never
+  // executes, so we chain .catch to fire the query and surface any error.
+  prisma.matchQuestion
+    .create({
+      data: {
+        matchId: room.matchId,
+        questionId: question.id,
+        questionIndex,
+        player1Answer: existing.player1 ?? null,
+        player2Answer: existing.player2 ?? null,
+        firstCorrect: existing.firstCorrect ?? null,
+      },
+    })
+    .catch((err) => console.error('Failed to save match question:', err));
 
   room.currentIndex++;
 
