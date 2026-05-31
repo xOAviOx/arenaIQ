@@ -1,142 +1,216 @@
 import Link from 'next/link';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
-import { Swords, Zap, Trophy, Brain } from 'lucide-react';
+import { Swords, Zap, Trophy, Brain, ArrowRight } from 'lucide-react';
+import { TopBar } from '@/components/shared/TopBar';
+
+const FEATURES = [
+  {
+    icon: Swords,
+    title: '1v1 Real-time Battles',
+    desc: 'Server-authoritative duels. No cheating, no lag excuses — just you versus them.',
+    accent: 'text-arena-volt',
+  },
+  {
+    icon: Brain,
+    title: 'JEE & NEET Arsenal',
+    desc: 'Full LaTeX rendering across Physics, Chemistry, Maths and Biology.',
+    accent: 'text-arena-cyan',
+  },
+  {
+    icon: Zap,
+    title: '90 Seconds. One Shot.',
+    desc: 'First correct answer takes the round. Speed and accuracy both pay.',
+    accent: 'text-arena-gold',
+  },
+  {
+    icon: Trophy,
+    title: 'Glicko-2 Ranked',
+    desc: 'Honest matchmaking. Climb six tiers from Beginner to Grandmaster.',
+    accent: 'text-arena-green',
+  },
+];
+
+const TIERS = [
+  { tier: 'Beginner', range: '0–800', color: 'text-arena-faint', ring: 'ring-arena-faint/30' },
+  { tier: 'Apprentice', range: '800–1200', color: 'text-slate-300', ring: 'ring-slate-300/30' },
+  { tier: 'Scholar', range: '1200–1600', color: 'text-arena-cyan', ring: 'ring-arena-cyan/40' },
+  { tier: 'Expert', range: '1600–2000', color: 'text-arena-blue', ring: 'ring-arena-blue/40' },
+  { tier: 'Master', range: '2000–2400', color: 'text-fuchsia-400', ring: 'ring-fuchsia-400/40' },
+  { tier: 'Grandmaster', range: '2400+', color: 'text-arena-gold', ring: 'ring-arena-gold/50' },
+];
+
+const STATS = [
+  { value: '90s', label: 'per question' },
+  { value: '6', label: 'rating tiers' },
+  { value: '1v1', label: 'live duels' },
+  { value: '45+', label: 'curated problems' },
+];
 
 export default function LandingPage() {
-  const features = [
-    {
-      icon: Swords,
-      title: '1v1 Real-time Battles',
-      desc: 'Challenge opponents instantly with server-authoritative game logic.',
-    },
-    {
-      icon: Brain,
-      title: 'JEE & NEET Questions',
-      desc: 'Full LaTeX rendering for Physics, Chemistry, Maths, and Biology.',
-    },
-    {
-      icon: Zap,
-      title: '90s Per Question',
-      desc: 'First correct answer wins the round. Speed and accuracy both matter.',
-    },
-    {
-      icon: Trophy,
-      title: 'Glicko-2 Ratings',
-      desc: 'Fair matchmaking. Six tiers from Beginner to Grandmaster.',
-    },
-  ];
-
   return (
-    <main className="min-h-screen bg-arena-bg">
-      {/* Nav */}
-      <nav className="flex items-center justify-between border-b border-arena-border px-6 py-4">
-        <div className="flex items-center gap-2">
-          <Swords className="h-6 w-6 text-arena-accent" />
-          <span className="text-lg font-bold text-white">ArenaIQ</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <SignedOut>
-            <Link
-              href="/login"
-              className="rounded-lg border border-arena-border px-4 py-2 text-sm text-slate-300 transition-colors hover:bg-arena-surface"
-            >
-              Sign In
-            </Link>
-          </SignedOut>
-          <SignedIn>
-            <Link
-              href="/dashboard"
-              className="rounded-lg bg-arena-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-arena-accent/80"
-            >
-              Dashboard
-            </Link>
-          </SignedIn>
-        </div>
-      </nav>
+    <main className="min-h-screen">
+      <TopBar brandHref={null}>
+        <SignedOut>
+          <Link
+            href="/login"
+            className="rounded-xl border border-arena-line px-4 py-2 text-sm font-medium text-arena-dim transition-colors hover:border-arena-line-2 hover:text-arena-text"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/register"
+            className="rounded-xl bg-arena-volt px-4 py-2 text-sm font-semibold text-[#0b0d14] shadow-volt-sm transition-transform hover:-translate-y-0.5"
+          >
+            Sign Up
+          </Link>
+        </SignedOut>
+        <SignedIn>
+          <Link
+            href="/dashboard"
+            className="rounded-xl bg-arena-volt px-4 py-2 text-sm font-semibold text-[#0b0d14] shadow-volt-sm transition-transform hover:-translate-y-0.5"
+          >
+            Dashboard
+          </Link>
+        </SignedIn>
+      </TopBar>
 
       {/* Hero */}
-      <section className="mx-auto max-w-4xl px-6 py-24 text-center">
-        <div className="mb-4 inline-flex items-center rounded-full border border-arena-accent/30 bg-arena-accent/10 px-4 py-1.5 text-sm text-arena-accent-light">
-          Competitive exam prep, gamified
-        </div>
-        <h1 className="mt-6 text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
-          Chess.com
-          <br />
-          <span className="bg-gradient-to-r from-arena-accent to-arena-accent-light bg-clip-text text-transparent">
-            for JEE/NEET
+      <section className="relative mx-auto max-w-5xl px-6 pb-20 pt-20 text-center sm:pt-28">
+        <div
+          className="stagger mb-7 inline-flex items-center gap-2 rounded-full border border-arena-volt/30 bg-arena-volt/[0.07] px-4 py-1.5 text-sm text-arena-accent-light"
+          style={{ ['--i' as string]: 0 }}
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping-slow rounded-full bg-arena-volt opacity-70" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-arena-volt" />
           </span>
+          Competitive exam prep, turned blood sport
+        </div>
+
+        <h1
+          className="stagger font-display text-5xl font-extrabold leading-[0.95] tracking-tight text-arena-text sm:text-7xl"
+          style={{ ['--i' as string]: 1 }}
+        >
+          The ranked arena
+          <br />
+          for <span className="text-gradient-volt">JEE &amp; NEET</span>
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">
-          Real-time 1v1 math battles. Solve faster than your opponent to win the round.
-          Ranked matches, Glicko-2 ratings, and 50+ curated questions.
+
+        <p
+          className="stagger mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-arena-dim"
+          style={{ ['--i' as string]: 2 }}
+        >
+          Real-time 1v1 problem duels. Solve faster than your opponent to steal the
+          round. Ranked matches, Glicko-2 ratings, and a leaderboard that doesn&apos;t lie.
         </p>
 
-        <div className="mt-10 flex justify-center gap-4">
+        <div
+          className="stagger mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          style={{ ['--i' as string]: 3 }}
+        >
           <SignedOut>
             <Link
-              href="/login"
-              className="rounded-xl bg-arena-accent px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-arena-accent/30 transition-all hover:bg-arena-accent/80 hover:shadow-arena-accent/50"
+              href="/register"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-arena-volt px-8 py-4 text-base font-bold text-[#0b0d14] shadow-volt transition-transform hover:-translate-y-0.5"
             >
-              Start Playing Free
+              <span className="sheen-layer" aria-hidden />
+              Enter the Arena
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>
           </SignedOut>
           <SignedIn>
             <Link
               href="/dashboard"
-              className="rounded-xl bg-arena-accent px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-arena-accent/30 transition-all hover:bg-arena-accent/80"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-arena-volt px-8 py-4 text-base font-bold text-[#0b0d14] shadow-volt transition-transform hover:-translate-y-0.5"
             >
+              <span className="sheen-layer" aria-hidden />
               Find a Match
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>
           </SignedIn>
           <Link
             href="/leaderboard"
-            className="rounded-xl border border-arena-border px-8 py-3.5 text-base font-semibold text-slate-300 transition-colors hover:bg-arena-surface"
+            className="inline-flex items-center gap-2 rounded-2xl border border-arena-line px-8 py-4 text-base font-semibold text-arena-text transition-colors hover:border-arena-volt/40 hover:bg-white/[0.02]"
           >
+            <Trophy className="h-5 w-5 text-arena-gold" />
             Leaderboard
           </Link>
+        </div>
+
+        {/* Stat ticker */}
+        <div
+          className="stagger mx-auto mt-16 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-arena-line bg-arena-line sm:grid-cols-4"
+          style={{ ['--i' as string]: 4 }}
+        >
+          {STATS.map((s) => (
+            <div key={s.label} className="bg-arena-panel px-4 py-6">
+              <div className="font-mono text-3xl font-bold text-arena-text">{s.value}</div>
+              <div className="mt-1 text-xs uppercase tracking-widest text-arena-faint">
+                {s.label}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Features */}
-      <section className="mx-auto max-w-4xl px-6 pb-24">
+      <section className="mx-auto max-w-5xl px-6 pb-24">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {features.map(({ icon: Icon, title, desc }) => (
+          {FEATURES.map(({ icon: Icon, title, desc, accent }, i) => (
             <div
               key={title}
-              className="rounded-2xl border border-arena-border bg-arena-surface p-6 transition-colors hover:border-arena-accent/30"
+              className="panel panel-hover stagger p-6"
+              style={{ ['--i' as string]: i }}
             >
-              <Icon className="h-6 w-6 text-arena-accent-light" />
-              <h3 className="mt-3 font-semibold text-white">{title}</h3>
-              <p className="mt-1.5 text-sm text-slate-400">{desc}</p>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-arena-line bg-arena-raised">
+                <Icon className={`h-5 w-5 ${accent}`} />
+              </div>
+              <h3 className="mt-4 font-display text-lg font-bold text-arena-text">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-arena-dim">{desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Tiers */}
-      <section className="border-t border-arena-border py-16">
-        <div className="mx-auto max-w-4xl px-6">
-          <h2 className="mb-8 text-center text-2xl font-bold text-white">Rating Tiers</h2>
-          <div className="flex flex-wrap justify-center gap-3">
-            {[
-              { tier: 'Beginner', range: '0–800', color: 'text-slate-400' },
-              { tier: 'Apprentice', range: '800–1200', color: 'text-slate-300' },
-              { tier: 'Scholar', range: '1200–1600', color: 'text-emerald-400' },
-              { tier: 'Expert', range: '1600–2000', color: 'text-blue-400' },
-              { tier: 'Master', range: '2000–2400', color: 'text-purple-400' },
-              { tier: 'Grandmaster', range: '2400+', color: 'text-yellow-400' },
-            ].map(({ tier, range, color }) => (
+      <section className="relative border-t border-arena-line/70 py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-arena-faint">
+            The Climb
+          </p>
+          <h2 className="mt-3 text-center font-display text-3xl font-bold text-arena-text">
+            Six tiers. One ladder.
+          </h2>
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
+            {TIERS.map(({ tier, range, color, ring }, i) => (
               <div
                 key={tier}
-                className="flex flex-col items-center gap-1 rounded-xl border border-arena-border bg-arena-surface px-5 py-3"
+                className={`stagger flex flex-col items-center gap-1 rounded-2xl bg-arena-panel px-6 py-4 ring-1 ${ring}`}
+                style={{ ['--i' as string]: i }}
               >
-                <span className={`font-semibold ${color}`}>{tier}</span>
-                <span className="text-xs text-slate-500">{range}</span>
+                <span className={`font-display font-bold ${color}`}>{tier}</span>
+                <span className="font-mono text-xs text-arena-faint">{range}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-arena-line/70 py-8">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6">
+          <BrandMarkFooter />
+          <p className="font-mono text-xs text-arena-faint">Solve. Climb. Dominate.</p>
+        </div>
+      </footer>
     </main>
+  );
+}
+
+function BrandMarkFooter() {
+  return (
+    <span className="flex items-center gap-2 text-sm text-arena-dim">
+      <span className="h-1.5 w-1.5 rounded-full bg-arena-volt" />
+      ArenaIQ
+    </span>
   );
 }
