@@ -92,5 +92,8 @@ export const useBattleStore = create<BattleState>()((set) => ({
 
   setOpponentDisconnected: (value) => set({ opponentDisconnected: value }),
 
+  addChatMessage: (message) =>
+    set((state) => ({ messages: [...state.messages, message].slice(-100) })),
+
   reset: () => set(initialState),
 }));
