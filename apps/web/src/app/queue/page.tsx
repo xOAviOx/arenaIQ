@@ -6,7 +6,7 @@ import { useQueue } from '@/hooks/useQueue';
 import { useQueueStore } from '@/store/queueStore';
 import { QueueStatus } from '@/components/queue/QueueStatus';
 import { MatchFoundModal } from '@/components/queue/MatchFoundModal';
-import { Swords } from 'lucide-react';
+import { BrandMark } from '@/components/shared/BrandMark';
 
 export default function QueuePage() {
   const searchParams = useSearchParams();
