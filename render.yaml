@@ -1,0 +1,33 @@
+# Render Blueprint for the ArenaIQ realtime backend (Express + socket.io).
+# The Next.js frontend deploys separately on Vercel.
+#
+# Deploy: push this repo to GitHub, then in Render → "New +" → "Blueprint",
+# pick this repo. Render reads this file and creates the service below.
+# Fill the `sync: false` env vars in the Render dashboard (they are secrets).
+services:
+  - type: web
+    name: arenaiq-server
+    runtime: node
+    plan: free
+    region: oregon
+    # Installs all workspaces; packages/db postinstall runs `prisma generate`.
+    buildCommand: npm install
+    # ts-node (transpile-only) runs the TS source directly — no compiled dist,
+    # so the workspace TS packages (@arenaiq/db, @arenaiq/types) resolve fine.
+    startCommand: npm run start -w @arenaiq/server
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render injects PORT automatically; config.ts already reads process.env.PORT.
+      - key: DATABASE_URL # Supabase pooled connection string (port 6543, ?pgbouncer=true)
+        sync: false
+      - key: DIRECT_URL # Supabase direct connection string (port 5432)
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: CLIENT_URL # your Vercel URL, e.g. https://arenaiq.vercel.app
+        sync: false
