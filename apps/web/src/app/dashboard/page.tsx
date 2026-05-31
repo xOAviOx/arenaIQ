@@ -1,58 +1,33 @@
-import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
-import { prisma } from '@arenaiq/db';
-import { RatingCard } from '@/components/dashboard/RatingCard';
-import { StatsGrid } from '@/components/dashboard/StatsGrid';
 import { FindMatchButton } from './FindMatchButton';
 import { TopBar } from '@/components/shared/TopBar';
-import { UserProfile } from '@arenaiq/types';
+import { getOrCreateUserProfile } from '@/lib/user';
+import { getTier, TIER_COLORS } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { Trophy } from 'lucide-react';
+import { Trophy, UserRound } from 'lucide-react';
 
 // Always render fresh so rating/stats reflect the latest completed match.
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) redirect('/login');
+  const result = await getOrCreateUserProfile();
+  if (!result) redirect('/login');
 
-  let dbUser = await prisma.user.findUnique({ where: { clerkId: clerkUser.id } });
-
-  if (!dbUser) {
-    const username =
-      clerkUser.username ??
-      clerkUser.emailAddresses[0]?.emailAddress.split('@')[0] ??
-      `player_${clerkUser.id.slice(-6)}`;
-
-    dbUser = await prisma.user.create({
-      data: {
-        clerkId: clerkUser.id,
-        username,
-        email: clerkUser.emailAddresses[0]?.emailAddress ?? '',
-        rating: 1200,
-        ratingDeviation: 350,
-        volatility: 0.06,
-      },
-    });
-  }
-
-  const profile: UserProfile = {
-    id: dbUser.id,
-    username: dbUser.username,
-    email: dbUser.email,
-    rating: dbUser.rating,
-    ratingDeviation: dbUser.ratingDeviation,
-    volatility: dbUser.volatility,
-    wins: dbUser.wins,
-    losses: dbUser.losses,
-    draws: dbUser.draws,
-    createdAt: dbUser.createdAt,
-  };
+  const { dbUser, profile } = result;
+  const tier = getTier(profile.rating);
 
   return (
     <main className="min-h-screen">
       <TopBar>
+        <Link
+          href="/profile"
+          className="flex items-center gap-1.5 rounded-xl border border-arena-line px-3.5 py-2 text-sm text-arena-dim transition-colors hover:border-arena-volt/40 hover:text-arena-text"
+        >
+          <UserRound className="h-4 w-4 text-arena-volt" />
+          <span className="hidden sm:inline">Profile</span>
+        </Link>
         <Link
           href="/leaderboard"
           className="flex items-center gap-1.5 rounded-xl border border-arena-line px-3.5 py-2 text-sm text-arena-dim transition-colors hover:border-arena-volt/40 hover:text-arena-text"
@@ -74,11 +49,25 @@ export default async function DashboardPage() {
           <p className="mt-1.5 text-sm text-arena-dim">Your opponents are warming up. Are you?</p>
         </div>
 
-        <div className="stagger" style={{ ['--i' as string]: 1 }}>
-          <RatingCard profile={profile} />
-        </div>
-
-        <StatsGrid profile={profile} />
+        {/* Quick rating glance — full breakdown lives on the profile page. */}
+        <Link
+          href="/profile"
+          className="panel panel-hover stagger flex items-center justify-between gap-4 p-5"
+          style={{ ['--i' as string]: 1 }}
+        >
+          <div>
+            <p className="text-xs font-medium uppercase tracking-widest text-arena-faint">
+              Current Rating
+            </p>
+            <p className="mt-1 font-mono text-3xl font-bold tabular-nums text-arena-text">
+              {profile.rating}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className={cn('font-bold uppercase tracking-wide', TIER_COLORS[tier])}>{tier}</p>
+            <p className="mt-1 font-mono text-xs text-arena-faint">View full profile →</p>
+          </div>
+        </Link>
 
         <div className="stagger" style={{ ['--i' as string]: 2 }}>
           <FindMatchButton userId={dbUser.id} rating={dbUser.rating} />
