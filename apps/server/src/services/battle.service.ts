@@ -295,6 +295,11 @@ async function endMatch(io: IoType, roomId: string, forcedWinnerId: string | nul
     room.timer = null;
   }
 
+  // Free any reserved bot exactly once — even if rating updates throw below.
+  const onEnd = room.onEnd;
+  room.onEnd = undefined;
+
+  try {
   let winnerId: string | null = forcedWinnerId;
 
   if (!forcedWinnerId) {
