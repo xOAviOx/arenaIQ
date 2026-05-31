@@ -39,6 +39,33 @@ export function registerBattleHandlers(io: IoType, socket: SocketType): void {
     handleAnswer(io, roomId, userId, questionIndex, answer);
   });
 
+  socket.on('resign', ({ roomId }) => {
+    const userId = socket.data.userId;
+    if (!userId) {
+      socket.emit('error', 'Not authenticated');
+      return;
+    }
+
+    const room = getRoom(roomId);
+    if (!room) {
+      socket.emit('error', 'Room not found');
+      return;
+    }
+
+    if (room.player1.userId !== userId && room.player2.userId !== userId) {
+      socket.emit('error', 'Not a participant of this room');
+      return;
+    }
+
+    handleResign(io, roomId, userId);
+  });
+
+  socket.on('send_chat', ({ roomId, message }) => {
+    const userId = socket.data.userId;
+    if (!userId) return;
+    handleChat(io, roomId, userId, message);
+  });
+
   socket.on('reconnect_battle', ({ roomId, userId }) => {
     const room = getRoom(roomId);
     if (!room) {
