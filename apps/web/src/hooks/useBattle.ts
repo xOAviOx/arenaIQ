@@ -44,6 +44,19 @@ export function useBattle(roomId: string) {
     [roomId, questionIndex, submittedAnswer, storeSubmitAnswer],
   );
 
+  const resign = useCallback(() => {
+    getSocket().emit('resign', { roomId });
+  }, [roomId]);
+
+  const sendChat = useCallback(
+    (message: string) => {
+      const trimmed = message.trim();
+      if (!trimmed) return;
+      getSocket().emit('send_chat', { roomId, message: trimmed });
+    },
+    [roomId],
+  );
+
   useEffect(() => {
     const socket = getSocket();
 
