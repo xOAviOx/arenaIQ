@@ -55,9 +55,23 @@ export default function BattlePage() {
 
   const isLocked = submittedAnswer !== null || phase === 'answer_reveal';
 
+  const matchOver = phase === 'completed';
+
   return (
     <main className="min-h-screen">
       <div className="mx-auto max-w-2xl space-y-4 p-4 pt-6">
+        {/* Header: live indicator + resign */}
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-arena-faint">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-arena-red opacity-70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-arena-red" />
+            </span>
+            Live · Ranked
+          </span>
+          {!matchOver && <ResignButton onResign={resign} />}
+        </div>
+
         {/* Disconnection warning */}
         {opponentDisconnected && (
           <div className="flex animate-pop-in items-center gap-2 rounded-xl border border-arena-gold/40 bg-arena-gold/10 px-4 py-2.5 text-sm text-arena-gold">
