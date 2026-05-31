@@ -36,6 +36,7 @@ export function MatchFoundModal({ opponent, startsIn }: MatchFoundModalProps) {
             initial={opponent.username[0]?.toUpperCase() ?? '?'}
             label={opponent.username}
             gradient="from-fuchsia-500 to-arena-blue"
+            badge={opponent.isBot ? 'BOT' : undefined}
           />
         </div>
 
