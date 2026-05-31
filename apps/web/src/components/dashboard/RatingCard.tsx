@@ -1,7 +1,7 @@
 'use client';
 
 import { UserProfile } from '@arenaiq/types';
-import { getTier, TIER_COLORS, TIER_BG } from '@/lib/utils';
+import { getTier, TIER_COLORS, TIER_BG, TIER_GLOW } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { TrendingUp } from 'lucide-react';
 
@@ -15,46 +15,59 @@ const TIER_NAMES = ['Beginner', 'Apprentice', 'Scholar', 'Expert', 'Master', 'Gr
 export function RatingCard({ profile }: RatingCardProps) {
   const tier = getTier(profile.rating);
 
-  const currentTierIndex = TIER_NAMES.indexOf(tier as typeof TIER_NAMES[number]);
+  const currentTierIndex = TIER_NAMES.indexOf(tier as (typeof TIER_NAMES)[number]);
   const floorRating = TIER_THRESHOLDS[currentTierIndex] ?? 0;
   const ceilRating = TIER_THRESHOLDS[currentTierIndex + 1] ?? 3000;
   const progress = ((profile.rating - floorRating) / (ceilRating - floorRating)) * 100;
+  const nextTier = TIER_NAMES[currentTierIndex + 1] ?? 'Max';
 
   return (
-    <div className="rounded-2xl border border-arena-border bg-arena-surface p-6">
-      <div className="flex items-start justify-between">
+    <div className={cn('panel overflow-hidden p-6', TIER_GLOW[tier])}>
+      {/* faint radial accent */}
+      <div
+        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-[0.12] blur-2xl"
+        style={{ background: 'radial-gradient(circle, currentColor, transparent 70%)' }}
+      />
+      <div className="relative flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-400">Current Rating</p>
-          <p className="mt-1 text-4xl font-bold tabular-nums text-white">{profile.rating}</p>
+          <p className="text-xs font-medium uppercase tracking-widest text-arena-faint">
+            Current Rating
+          </p>
+          <p className="mt-1.5 font-mono text-5xl font-bold tabular-nums text-arena-text">
+            {profile.rating}
+          </p>
         </div>
         <span
           className={cn(
-            'rounded-full border px-3 py-1 text-sm font-semibold',
+            'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-bold uppercase tracking-wide',
             TIER_COLORS[tier],
             TIER_BG[tier],
           )}
         >
+          <span className="h-2 w-2 rounded-full bg-current" />
           {tier}
         </span>
       </div>
 
-      <div className="mt-5">
-        <div className="flex justify-between text-xs text-slate-500 mb-1.5">
+      <div className="relative mt-6">
+        <div className="mb-2 flex justify-between font-mono text-xs text-arena-faint">
           <span>{floorRating}</span>
-          <span className="text-slate-400">Progress to {TIER_NAMES[currentTierIndex + 1] ?? 'Max'}</span>
+          <span className="text-arena-dim">→ {nextTier}</span>
           <span>{ceilRating}</span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-arena-border">
+        <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-arena-raised">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-arena-accent to-arena-accent-light transition-all duration-500"
-            style={{ width: `${Math.min(progress, 100)}%` }}
-          />
+            className="relative h-full rounded-full bg-volt-grad transition-all duration-700 ease-out"
+            style={{ width: `${Math.min(Math.max(progress, 3), 100)}%` }}
+          >
+            <span className="sheen-layer" aria-hidden />
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-1.5 text-xs text-slate-500">
-        <TrendingUp className="h-3.5 w-3.5" />
-        <span>RD: ±{Math.round(profile.ratingDeviation)}</span>
+      <div className="relative mt-5 flex items-center gap-1.5 font-mono text-xs text-arena-faint">
+        <TrendingUp className="h-3.5 w-3.5 text-arena-volt" />
+        <span>Deviation ±{Math.round(profile.ratingDeviation)}</span>
       </div>
     </div>
   );
