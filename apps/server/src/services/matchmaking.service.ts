@@ -4,6 +4,7 @@ import {
   ClientToServerEvents,
   InterServerEvents,
   SocketData,
+  RatingTier,
 } from '@arenaiq/types';
 import {
   redis,
@@ -278,11 +279,11 @@ async function expandRatingWindows(): Promise<void> {
   }
 }
 
-function getRatingTier(rating: number) {
-  if (rating >= 2400) return 'Grandmaster' as const;
-  if (rating >= 2000) return 'Master' as const;
-  if (rating >= 1600) return 'Expert' as const;
-  if (rating >= 1200) return 'Scholar' as const;
-  if (rating >= 800) return 'Apprentice' as const;
-  return 'Beginner' as const;
+function getRatingTier(rating: number): RatingTier {
+  if (rating >= 2400) return RatingTier.GRANDMASTER;
+  if (rating >= 2000) return RatingTier.MASTER;
+  if (rating >= 1600) return RatingTier.EXPERT;
+  if (rating >= 1200) return RatingTier.SCHOLAR;
+  if (rating >= 800) return RatingTier.APPRENTICE;
+  return RatingTier.BEGINNER;
 }
