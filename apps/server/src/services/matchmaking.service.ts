@@ -15,7 +15,8 @@ import {
   getPlayersInRatingRange,
   QueueEntry,
 } from '../lib/redis';
-import { createRoom, startBattle } from './battle.service';
+import { createRoom, startBattle, getRoom } from './battle.service';
+import { acquireBot, releaseBot, BotUser } from './bot.service';
 import { prisma } from '@arenaiq/db';
 import { config } from '../config';
 
