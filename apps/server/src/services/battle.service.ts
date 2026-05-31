@@ -113,6 +113,30 @@ function sendNextQuestion(io: IoType, roomId: string): void {
   room.timer = setTimeout(() => {
     handleTimerExpiry(io, roomId);
   }, config.battle.questionTimeLimit * 1000);
+
+  // If player2 is a bot, schedule its answer for this question.
+  if (room.bot) scheduleBotAnswer(io, roomId, room.currentIndex, question);
+}
+
+/** Queue the bot's answer for a question after a human-like thinking delay. */
+function scheduleBotAnswer(
+  io: IoType,
+  roomId: string,
+  questionIndex: number,
+  question: Question,
+): void {
+  const room = activeRooms.get(roomId);
+  if (!room || !room.bot) return;
+
+  const answer = pickBotAnswer(question, room.bot.rating);
+  const delay = botAnswerDelayMs(config.battle.questionTimeLimit);
+
+  setTimeout(() => {
+    const current = activeRooms.get(roomId);
+    if (!current || !current.bot) return;
+    if (current.status !== 'in_progress' || current.currentIndex !== questionIndex) return;
+    handleAnswer(io, roomId, current.bot.userId, questionIndex, answer);
+  }, delay);
 }
 
 export function handleAnswer(
