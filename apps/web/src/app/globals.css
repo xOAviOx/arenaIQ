@@ -2,35 +2,198 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
 :root {
   color-scheme: dark;
+  --ink: #07080c;
+  --panel: #0f111a;
+  --line: #222739;
+  --volt: #c8ff3d;
+  --cyan: #39e0ff;
+  --grid: rgba(120, 134, 170, 0.05);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background-color: #0a0a0f;
-  color: #e2e8f0;
-  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--ink);
+  color: #e9ebf3;
+  font-family: var(--font-sans), 'Hanken Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
-/* KaTeX overrides for dark theme */
+/* ── Ambient atmosphere ─────────────────────────────────────── */
+/* Graph-paper math grid + radial voltage glows, fixed behind everything */
+.arena-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 600px at 12% -8%, rgba(200, 255, 61, 0.1), transparent 60%),
+    radial-gradient(820px 560px at 92% 8%, rgba(57, 224, 255, 0.09), transparent 60%),
+    radial-gradient(1100px 700px at 50% 118%, rgba(123, 92, 255, 0.07), transparent 55%),
+    var(--ink);
+}
+.arena-grid {
+  position: fixed;
+  inset: -2px;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at 50% 30%, black 10%, transparent 78%);
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, black 10%, transparent 78%);
+  animation: gridPan 22s linear infinite;
+}
+/* Film grain */
+.arena-grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes gridPan {
+  from { background-position: 0 0; }
+  to { background-position: 40px 40px; }
+}
+
+/* ── Reusable building blocks ───────────────────────────────── */
+.panel {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0) 40%),
+    #0f111a;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+    0 24px 60px -34px rgba(0, 0, 0, 0.9);
+}
+.panel-hover {
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+.panel-hover:hover {
+  border-color: rgba(200, 255, 61, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+    0 30px 60px -30px rgba(0, 0, 0, 0.9), 0 0 40px -18px rgba(200, 255, 61, 0.4);
+}
+
+.text-gradient-volt {
+  background: linear-gradient(120deg, #eaff9e 0%, #c8ff3d 40%, #39e0ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-gradient-gold {
+  background: linear-gradient(120deg, #ffe9b0, #ffce4d 55%, #ff9e3d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Animated shimmer text (loaders / labels) */
+.shimmer-text {
+  background: linear-gradient(90deg, #5c6378 25%, #e9ebf3 50%, #5c6378 75%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 2.6s linear infinite;
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Sheen sweep across an element (use on a child overlay) */
+.sheen-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.sheen-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.18) 48%, transparent 62%);
+  transform: translateX(-130%);
+  animation: sheen 3.6s ease-in-out infinite;
+}
+@keyframes sheen {
+  0% { transform: translateX(-130%); }
+  55%, 100% { transform: translateX(130%); }
+}
+
+/* Volt divider line */
+.hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent);
+}
+
+/* Staggered reveal helper — set --i for delay */
+.stagger {
+  animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+@keyframes rise {
+  from { transform: translateY(22px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid rgba(200, 255, 61, 0.7);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: rgba(200, 255, 61, 0.3);
+  color: #fff;
+}
+
+/* ── KaTeX (dark) ───────────────────────────────────────────── */
 .katex {
-  color: #e2e8f0;
-  font-size: 1em;
+  color: #f1f3fb;
+  font-size: 1.04em;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #111118;
-}
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: #0a0c12; }
 ::-webkit-scrollbar-thumb {
-  background: #1e1e2e;
-  border-radius: 3px;
+  background: #262c3e;
+  border-radius: 8px;
+  border: 2px solid #0a0c12;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #7c3aed;
+::-webkit-scrollbar-thumb:hover { background: var(--volt); }
+
+/* ── Respect reduced motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .arena-grid { animation: none; }
 }
