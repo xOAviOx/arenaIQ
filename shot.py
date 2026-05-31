@@ -11,8 +11,8 @@ with sync_playwright() as p:
     page = browser.new_page(viewport={"width": 1280, "height": 900}, device_scale_factor=2)
     for url, out in PAGES:
         try:
-            page.goto(url, wait_until="networkidle", timeout=30000)
-            page.wait_for_timeout(900)
+            page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            page.wait_for_timeout(2500)
             page.screenshot(path=out, full_page=True)
             print(f"OK  {url} -> {out}")
         except Exception as e:
