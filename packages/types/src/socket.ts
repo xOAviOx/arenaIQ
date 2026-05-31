@@ -84,6 +84,13 @@ export interface TimerSyncPayload {
   remainingMs: number;
 }
 
+export interface ChatMessagePayload {
+  senderId: string;
+  username: string;
+  message: string;
+  timestamp: number;
+}
+
 // ── Typed event maps ───────────────────────────────────────────
 
 export interface ServerToClientEvents {
