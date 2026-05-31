@@ -40,6 +40,7 @@ interface BattleState {
   setAnswerResult: (result: BattleState['lastResult'], scores: { you: number; opponent: number }) => void;
   setMatchResult: (result: MatchEndPayload) => void;
   setOpponentDisconnected: (value: boolean) => void;
+  addChatMessage: (message: ChatMessage) => void;
   reset: () => void;
 }
 
@@ -58,6 +59,7 @@ const initialState = {
   lastResult: null,
   matchResult: null,
   opponentDisconnected: false,
+  messages: [],
 };
 
 export const useBattleStore = create<BattleState>()((set) => ({
