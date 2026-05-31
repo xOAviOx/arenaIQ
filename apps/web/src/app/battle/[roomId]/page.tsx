@@ -101,7 +101,7 @@ export default function BattlePage() {
             </div>
 
             {/* Question */}
-            <div className="rounded-2xl border border-arena-border bg-arena-bg/50 p-5">
+            <div className="panel p-5">
               <QuestionRenderer
                 question={currentQuestion}
                 selectedAnswer={submittedAnswer}
