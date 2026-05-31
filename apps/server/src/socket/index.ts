@@ -10,6 +10,7 @@ import { config } from '../config';
 import { registerMatchmakingHandlers } from './matchmaking';
 import { registerBattleHandlers } from './battle';
 import { startMatchmaking } from '../services/matchmaking.service';
+import { ensureBots } from '../services/bot.service';
 
 export function createSocketServer(httpServer: http.Server) {
   const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(
@@ -36,6 +37,8 @@ export function createSocketServer(httpServer: http.Server) {
     });
   });
 
+  // Seed the bot pool, then begin matchmaking (bots are reserved on demand).
+  void ensureBots();
   startMatchmaking(io);
 
   return io;
