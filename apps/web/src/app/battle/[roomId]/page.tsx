@@ -139,6 +139,9 @@ export default function BattlePage() {
           </div>
         )}
       </div>
+
+      {/* In-match chat */}
+      <BattleChat messages={messages} onSend={sendChat} opponentName={opponent.username} />
     </main>
   );
 }
