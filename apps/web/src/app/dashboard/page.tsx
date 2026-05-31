@@ -1,12 +1,14 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import { UserButton } from '@clerk/nextjs';
 import { prisma } from '@arenaiq/db';
 import { RatingCard } from '@/components/dashboard/RatingCard';
 import { StatsGrid } from '@/components/dashboard/StatsGrid';
 import { FindMatchButton } from './FindMatchButton';
+import { TopBar } from '@/components/shared/TopBar';
 import { UserProfile } from '@arenaiq/types';
 import Link from 'next/link';
-import { Trophy, LayoutDashboard } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 // Always render fresh so rating/stats reflect the latest completed match.
 export const dynamic = 'force-dynamic';
