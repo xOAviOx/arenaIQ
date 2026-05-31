@@ -53,20 +53,27 @@ function Fighter({
   label,
   gradient,
   dark,
+  badge,
 }: {
   initial: string;
   label: string;
   gradient: string;
   dark?: boolean;
+  badge?: string;
 }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl font-extrabold ${gradient} ${
+        className={`relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl font-extrabold ${gradient} ${
           dark ? 'text-[#0b0d14]' : 'text-white'
         }`}
       >
         {initial}
+        {badge && (
+          <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-md border border-arena-cyan/50 bg-arena-ink px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-arena-cyan">
+            {badge}
+          </span>
+        )}
       </div>
       <span className="max-w-[6rem] truncate text-sm font-semibold text-arena-text">{label}</span>
     </div>
