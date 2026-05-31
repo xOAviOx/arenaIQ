@@ -9,6 +9,7 @@ import {
 import { config } from '../config';
 import { registerMatchmakingHandlers } from './matchmaking';
 import { registerBattleHandlers } from './battle';
+import { registerPrivateRoomHandlers } from './privateRoom';
 import { startMatchmaking } from '../services/matchmaking.service';
 import { ensureBots } from '../services/bot.service';
 
@@ -31,6 +32,7 @@ export function createSocketServer(httpServer: http.Server) {
 
     registerMatchmakingHandlers(io, socket);
     registerBattleHandlers(io, socket);
+    registerPrivateRoomHandlers(io, socket);
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`);

@@ -1,4 +1,5 @@
 import { PublicUser, QuestionForBattle, QuestionResult, RatingChange } from './models';
+import { RatingTier } from './enums';
 
 // ── Client → Server ────────────────────────────────────────────
 
@@ -32,12 +33,56 @@ export interface SendChatPayload {
   message: string;
 }
 
+// ── Private rooms (play with a friend) ─────────────────────────
+
+export interface CreateRoomPayload {
+  userId: string;
+}
+
+export interface JoinRoomPayload {
+  userId: string;
+  code: string;
+}
+
+/** Used by both start_room and leave_room — only the room code is needed. */
+export interface RoomActionPayload {
+  code: string;
+}
+
 // ── Server → Client ────────────────────────────────────────────
 
 export interface MatchFoundPayload {
   roomId: string;
   opponent: PublicUser;
   startsIn: number; // ms countdown before first question
+  /** False for casual friend matches (no rating change). Defaults to ranked. */
+  ranked?: boolean;
+}
+
+export interface RoomLobbyPlayer {
+  userId: string;
+  username: string;
+  rating: number;
+  tier: RatingTier;
+  isHost: boolean;
+}
+
+/** Snapshot of a private-room lobby, sent to everyone in it on every change. */
+export interface RoomLobbyPayload {
+  code: string;
+  players: RoomLobbyPlayer[];
+  /** True once a guest has joined — the host may begin the battle. */
+  canStart: boolean;
+}
+
+/** A non-fatal lobby message (bad code, not host, friend not joined yet). */
+export interface RoomErrorPayload {
+  message: string;
+}
+
+/** The lobby was dissolved (host left/disconnected) — clients should exit it. */
+export interface RoomClosedPayload {
+  message: string;
 }
 
 export interface QueueStatusPayload {
@@ -104,6 +149,9 @@ export interface ServerToClientEvents {
   opponent_reconnected: () => void;
   timer_sync: (payload: TimerSyncPayload) => void;
   chat_message: (payload: ChatMessagePayload) => void;
+  room_update: (payload: RoomLobbyPayload) => void;
+  room_error: (payload: RoomErrorPayload) => void;
+  room_closed: (payload: RoomClosedPayload) => void;
   error: (message: string) => void;
 }
 
@@ -114,6 +162,10 @@ export interface ClientToServerEvents {
   reconnect_battle: (payload: ReconnectPayload) => void;
   resign: (payload: ResignPayload) => void;
   send_chat: (payload: SendChatPayload) => void;
+  create_room: (payload: CreateRoomPayload) => void;
+  join_room: (payload: JoinRoomPayload) => void;
+  start_room: (payload: RoomActionPayload) => void;
+  leave_room: (payload: RoomActionPayload) => void;
 }
 
 export interface InterServerEvents {
@@ -123,4 +175,6 @@ export interface InterServerEvents {
 export interface SocketData {
   userId: string;
   roomId?: string;
+  /** Code of the private-room lobby this socket is currently sitting in. */
+  roomCode?: string;
 }

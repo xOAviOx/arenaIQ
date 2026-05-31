@@ -6,7 +6,7 @@ import { getOrCreateUserProfile } from '@/lib/user';
 import { getTier, TIER_COLORS } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { Trophy, UserRound } from 'lucide-react';
+import { Trophy, UserRound, Users } from 'lucide-react';
 
 // Always render fresh so rating/stats reflect the latest completed match.
 export const dynamic = 'force-dynamic';
@@ -69,8 +69,16 @@ export default async function DashboardPage() {
           </div>
         </Link>
 
-        <div className="stagger" style={{ ['--i' as string]: 2 }}>
+        <div className="stagger space-y-3" style={{ ['--i' as string]: 2 }}>
           <FindMatchButton userId={dbUser.id} rating={dbUser.rating} />
+          <Link
+            href={`/room?userId=${dbUser.id}`}
+            className="group flex w-full items-center justify-center gap-2.5 rounded-2xl border border-arena-line py-4 font-semibold text-arena-text transition-colors hover:border-arena-volt/40 hover:bg-white/[0.02]"
+          >
+            <Users className="h-5 w-5 text-arena-cyan transition-transform group-hover:scale-110" />
+            <span className="font-display tracking-tight">Play a Friend</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-arena-faint">casual</span>
+          </Link>
         </div>
       </div>
     </main>

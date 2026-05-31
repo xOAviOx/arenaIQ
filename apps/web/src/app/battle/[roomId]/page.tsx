@@ -35,6 +35,7 @@ export default function BattlePage() {
     opponent,
     opponentDisconnected,
     messages,
+    ranked,
   } = useBattleStore();
 
   const profile = useUserStore((s) => s.profile);
@@ -67,7 +68,7 @@ export default function BattlePage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-arena-red opacity-70" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-arena-red" />
             </span>
-            Live · Ranked
+            Live · {ranked ? 'Ranked' : 'Casual'}
           </span>
           {!matchOver && <ResignButton onResign={resign} />}
         </div>

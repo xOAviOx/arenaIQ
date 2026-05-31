@@ -7,11 +7,13 @@ import {
   SocketData,
   Question,
   QuestionResult,
+  RatingChange,
 } from '@arenaiq/types';
 import { config } from '../config';
 import { updateRatings } from './rating.service';
 import { getQuestionsForMatch } from './question.service';
 import { pickBotAnswer, botAnswerDelayMs } from './bot.service';
+import { getRatingTier } from '../lib/tier';
 
 export interface RoomState {
   roomId: string;
@@ -27,6 +29,8 @@ export interface RoomState {
   disconnectedPlayers: Map<string, NodeJS.Timeout>;
   /** Present when player2 is a CPU bot — the bot auto-answers each question. */
   bot?: { userId: string; rating: number };
+  /** False for casual friend matches — ratings and W/L are left untouched. */
+  ranked: boolean;
   /** Fired exactly once when the match ends (e.g. to free a reserved bot). */
   onEnd?: () => void;
 }
@@ -68,10 +72,109 @@ export async function createRoom(
     timer: null,
     status: 'waiting',
     disconnectedPlayers: new Map(),
+    ranked: true,
   };
 
   activeRooms.set(roomId, room);
   return roomId;
+}
+
+/** A player as needed to launch + announce a match (rating snapshot included). */
+export interface LaunchPlayer {
+  userId: string;
+  socketId: string;
+  username: string;
+  rating: number;
+  wins: number;
+  losses: number;
+}
+
+interface LaunchOptions {
+  /** Casual (friend) matches pass false so ratings/stats stay untouched. */
+  ranked?: boolean;
+  /** Mark player2 as a bot so it auto-answers. */
+  bot?: { userId: string; rating: number };
+  /** Cleanup fired once when the match ends (e.g. release a reserved bot). */
+  onEnd?: () => void;
+}
+
+/**
+ * Single entry point that both matchmaking and private rooms use to turn two
+ * resolved players into a live battle: creates the room, joins the sockets,
+ * emits `match_found` to each side, and schedules the first question.
+ * Returns the room id, or null if a required human socket vanished.
+ */
+export async function launchMatch(
+  io: IoType,
+  p1: LaunchPlayer,
+  p2: LaunchPlayer,
+  opts: LaunchOptions = {},
+): Promise<string | null> {
+  const roomId = await createRoom(
+    io,
+    { userId: p1.userId, socketId: p1.socketId, username: p1.username, rating: p1.rating },
+    { userId: p2.userId, socketId: p2.socketId, username: p2.username, rating: p2.rating },
+  );
+
+  const room = activeRooms.get(roomId);
+  if (!room) return null;
+
+  room.ranked = opts.ranked ?? true;
+  if (opts.bot) room.bot = opts.bot;
+  if (opts.onEnd) room.onEnd = opts.onEnd;
+
+  const p1IsBot = opts.bot?.userId === p1.userId;
+  const p2IsBot = opts.bot?.userId === p2.userId;
+  const p1Socket = io.sockets.sockets.get(p1.socketId);
+  const p2Socket = io.sockets.sockets.get(p2.socketId);
+
+  // A human without a live socket can't battle (bots legitimately have none).
+  if ((!p1Socket && !p1IsBot) || (!p2Socket && !p2IsBot)) {
+    activeRooms.delete(roomId);
+    opts.onEnd?.();
+    return null;
+  }
+
+  if (p1Socket) {
+    p1Socket.join(roomId);
+    p1Socket.data.roomId = roomId;
+    p1Socket.data.roomCode = undefined;
+  }
+  if (p2Socket) {
+    p2Socket.join(roomId);
+    p2Socket.data.roomId = roomId;
+    p2Socket.data.roomCode = undefined;
+  }
+
+  emitMatchFound(io, p1.socketId, roomId, p2, p2IsBot, room.ranked);
+  emitMatchFound(io, p2.socketId, roomId, p1, p1IsBot, room.ranked);
+
+  setTimeout(() => startBattle(io, roomId), config.battle.matchStartDelay);
+  return roomId;
+}
+
+function emitMatchFound(
+  io: IoType,
+  toSocketId: string,
+  roomId: string,
+  opponent: LaunchPlayer,
+  opponentIsBot: boolean,
+  ranked: boolean,
+): void {
+  io.to(toSocketId).emit('match_found', {
+    roomId,
+    opponent: {
+      id: opponent.userId,
+      username: opponent.username,
+      rating: opponent.rating,
+      tier: getRatingTier(opponent.rating),
+      wins: opponent.wins,
+      losses: opponent.losses,
+      ...(opponentIsBot ? { isBot: true } : {}),
+    },
+    startsIn: config.battle.matchStartDelay,
+    ranked,
+  });
 }
 
 export function startBattle(io: IoType, roomId: string): void {
@@ -311,17 +414,32 @@ async function endMatch(io: IoType, roomId: string, forcedWinnerId: string | nul
     // null = draw
   }
 
-  await prisma.match.update({
-    where: { id: room.matchId },
-    data: { winnerId },
-  });
+  let ratingResult: { player1Change: RatingChange; player2Change: RatingChange };
 
-  const ratingResult = await updateRatings(
-    room.matchId,
-    room.player1.userId,
-    room.player2.userId,
-    winnerId,
-  );
+  if (room.ranked) {
+    await prisma.match.update({
+      where: { id: room.matchId },
+      data: { winnerId },
+    });
+
+    ratingResult = await updateRatings(
+      room.matchId,
+      room.player1.userId,
+      room.player2.userId,
+      winnerId,
+    );
+  } else {
+    // Casual friend match: record the result but leave ratings + W/L alone.
+    await prisma.match.update({
+      where: { id: room.matchId },
+      data: { winnerId, status: 'COMPLETED', completedAt: new Date(), ratingDelta: 0 },
+    });
+
+    ratingResult = {
+      player1Change: { before: room.player1.rating, after: room.player1.rating, delta: 0 },
+      player2Change: { before: room.player2.rating, after: room.player2.rating, delta: 0 },
+    };
+  }
 
   const breakdown = Array.from({ length: room.currentIndex }, (_, i) => {
     const q = room.questions[i]!;

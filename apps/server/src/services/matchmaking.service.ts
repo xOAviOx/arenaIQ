@@ -4,7 +4,6 @@ import {
   ClientToServerEvents,
   InterServerEvents,
   SocketData,
-  RatingTier,
 } from '@arenaiq/types';
 import {
   redis,
@@ -16,7 +15,7 @@ import {
   getPlayersInRatingRange,
   QueueEntry,
 } from '../lib/redis';
-import { createRoom, startBattle, getRoom } from './battle.service';
+import { launchMatch } from './battle.service';
 import { acquireBot, releaseBot, BotUser } from './bot.service';
 import { prisma } from '@arenaiq/db';
 import { config } from '../config';
@@ -134,65 +133,25 @@ async function createAndStartMatch(
 
   if (!p1User || !p2User) return;
 
-  const roomId = await createRoom(
+  await launchMatch(
     io,
     {
       userId: p1User.id,
       socketId: p1Entry.socketId,
       username: p1User.username,
       rating: p1User.rating,
+      wins: p1User.wins,
+      losses: p1User.losses,
     },
     {
       userId: p2User.id,
       socketId: p2Entry.socketId,
       username: p2User.username,
       rating: p2User.rating,
-    },
-  );
-
-  const p1Socket = io.sockets.sockets.get(p1Entry.socketId);
-  const p2Socket = io.sockets.sockets.get(p2Entry.socketId);
-
-  if (!p1Socket || !p2Socket) {
-    console.warn('Socket(s) not found for match, aborting room:', roomId);
-    return;
-  }
-
-  p1Socket.join(roomId);
-  p2Socket.join(roomId);
-
-  p1Socket.data.roomId = roomId;
-  p2Socket.data.roomId = roomId;
-
-  io.to(p1Entry.socketId).emit('match_found', {
-    roomId,
-    opponent: {
-      id: p2User.id,
-      username: p2User.username,
-      rating: p2User.rating,
-      tier: getRatingTier(p2User.rating),
       wins: p2User.wins,
       losses: p2User.losses,
     },
-    startsIn: config.battle.matchStartDelay,
-  });
-
-  io.to(p2Entry.socketId).emit('match_found', {
-    roomId,
-    opponent: {
-      id: p1User.id,
-      username: p1User.username,
-      rating: p1User.rating,
-      tier: getRatingTier(p1User.rating),
-      wins: p1User.wins,
-      losses: p1User.losses,
-    },
-    startsIn: config.battle.matchStartDelay,
-  });
-
-  setTimeout(() => {
-    startBattle(io, roomId);
-  }, config.battle.matchStartDelay);
+  );
 }
 
 async function createAndStartBotMatch(
@@ -206,20 +165,17 @@ async function createAndStartBotMatch(
     return;
   }
 
-  // The human must still be connected before we spin up a room.
-  const humanSocket = io.sockets.sockets.get(humanEntry.socketId);
-  if (!humanSocket) {
-    releaseBot(bot.id);
-    return;
-  }
-
-  const roomId = await createRoom(
+  // launchMatch frees the bot (via onEnd) if the human's socket has vanished,
+  // and again when the match ends — so the bot is always released exactly once.
+  await launchMatch(
     io,
     {
       userId: human.id,
       socketId: humanEntry.socketId,
       username: human.username,
       rating: human.rating,
+      wins: human.wins,
+      losses: human.losses,
     },
     {
       // Bot has no socket — a sentinel id keeps emits to it harmless no-ops.
@@ -227,39 +183,14 @@ async function createAndStartBotMatch(
       socketId: `bot:${bot.id}`,
       username: bot.username,
       rating: bot.rating,
-    },
-  );
-
-  // Make the room bot-aware so player2 auto-answers, and free the bot on end.
-  const room = getRoom(roomId);
-  if (room) {
-    room.bot = { userId: bot.id, rating: bot.rating };
-    room.onEnd = () => releaseBot(bot.id);
-  } else {
-    releaseBot(bot.id);
-    return;
-  }
-
-  humanSocket.join(roomId);
-  humanSocket.data.roomId = roomId;
-
-  io.to(humanEntry.socketId).emit('match_found', {
-    roomId,
-    opponent: {
-      id: bot.id,
-      username: bot.username,
-      rating: bot.rating,
-      tier: getRatingTier(bot.rating),
       wins: bot.wins,
       losses: bot.losses,
-      isBot: true,
     },
-    startsIn: config.battle.matchStartDelay,
-  });
-
-  setTimeout(() => {
-    startBattle(io, roomId);
-  }, config.battle.matchStartDelay);
+    {
+      bot: { userId: bot.id, rating: bot.rating },
+      onEnd: () => releaseBot(bot.id),
+    },
+  );
 }
 
 async function expandRatingWindows(): Promise<void> {
@@ -277,13 +208,4 @@ async function expandRatingWindows(): Promise<void> {
       ratingWindow: newWindow,
     });
   }
-}
-
-function getRatingTier(rating: number): RatingTier {
-  if (rating >= 2400) return RatingTier.GRANDMASTER;
-  if (rating >= 2000) return RatingTier.MASTER;
-  if (rating >= 1600) return RatingTier.EXPERT;
-  if (rating >= 1200) return RatingTier.SCHOLAR;
-  if (rating >= 800) return RatingTier.APPRENTICE;
-  return RatingTier.BEGINNER;
 }

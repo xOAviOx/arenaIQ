@@ -30,9 +30,9 @@ export function useQueue(userId: string, rating: number) {
       setQueueStatus(payload.position, payload.estimatedWait, payload.playersOnline);
     };
 
-    const onMatchFound = (payload: { roomId: string; opponent: any; startsIn: number }) => {
+    const onMatchFound = (payload: { roomId: string; opponent: any; startsIn: number; ranked?: boolean }) => {
       setMatched(payload.roomId, payload.opponent, payload.startsIn);
-      initBattle(payload.roomId, payload.opponent);
+      initBattle(payload.roomId, payload.opponent, payload.ranked ?? true);
       setTimeout(() => {
         router.push(`/battle/${payload.roomId}`);
       }, 2000); // show match found modal briefly

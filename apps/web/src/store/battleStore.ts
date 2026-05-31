@@ -15,6 +15,7 @@ interface BattleState {
   roomId: string | null;
   matchId: string | null;
   opponent: PublicUser | null;
+  ranked: boolean;
   phase: BattlePhase;
   currentQuestion: QuestionForBattle | null;
   questionIndex: number;
@@ -33,7 +34,7 @@ interface BattleState {
   messages: ChatMessage[];
 
   // Actions
-  initBattle: (roomId: string, opponent: PublicUser) => void;
+  initBattle: (roomId: string, opponent: PublicUser, ranked?: boolean) => void;
   setQuestion: (question: QuestionForBattle, index: number, total: number, timeLimit: number) => void;
   submitAnswer: (answer: number) => void;
   setOpponentAnswered: () => void;
@@ -48,6 +49,7 @@ const initialState = {
   roomId: null,
   matchId: null,
   opponent: null,
+  ranked: true,
   phase: 'idle' as BattlePhase,
   currentQuestion: null,
   questionIndex: 0,
@@ -65,8 +67,8 @@ const initialState = {
 export const useBattleStore = create<BattleState>()((set) => ({
   ...initialState,
 
-  initBattle: (roomId, opponent) =>
-    set({ ...initialState, roomId, opponent, phase: 'starting' }),
+  initBattle: (roomId, opponent, ranked = true) =>
+    set({ ...initialState, roomId, opponent, ranked, phase: 'starting' }),
 
   setQuestion: (question, index, total, timeLimit) =>
     set({

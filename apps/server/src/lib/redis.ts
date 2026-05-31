@@ -19,7 +19,9 @@ export interface QueueEntry {
 }
 
 export async function addToQueue(entry: QueueEntry): Promise<void> {
-  await redis.hset(`queue:player:${entry.userId}`, entry);
+  // Spread to a fresh object literal — satisfies hset's Record<string, unknown>
+  // signature, which a named interface type does not.
+  await redis.hset(`queue:player:${entry.userId}`, { ...entry });
   await redis.expire(`queue:player:${entry.userId}`, QUEUE_ENTRY_TTL);
   await redis.zadd(QUEUE_KEY, { score: entry.rating, member: entry.userId });
 }
@@ -30,13 +32,14 @@ export async function removeFromQueue(userId: string): Promise<void> {
 }
 
 export async function getQueueEntry(userId: string): Promise<QueueEntry | null> {
-  const entry = await redis.hgetall<QueueEntry>(`queue:player:${userId}`);
-  if (!entry || !entry.userId) return null;
+  const entry = await redis.hgetall<Record<string, unknown>>(`queue:player:${userId}`);
+  if (!entry || !entry['userId']) return null;
   return {
-    ...entry,
-    rating: Number(entry.rating),
-    joinedAt: Number(entry.joinedAt),
-    ratingWindow: Number(entry.ratingWindow),
+    userId: String(entry['userId']),
+    socketId: String(entry['socketId']),
+    rating: Number(entry['rating']),
+    joinedAt: Number(entry['joinedAt']),
+    ratingWindow: Number(entry['ratingWindow']),
   };
 }
 
