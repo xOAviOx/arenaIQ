@@ -641,6 +641,8 @@ const questions = [
   },
 ] as const;
 
+export { questions };
+
 async function main() {
   console.log('Seeding 50 JEE/NEET questions...');
 
