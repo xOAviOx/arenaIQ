@@ -29,40 +29,38 @@ export function Timer({ totalSeconds, onExpire, className }: TimerProps) {
   }, [totalSeconds, onExpire]);
 
   const fraction = remaining / totalSeconds;
-  const circumference = 2 * Math.PI * 28;
+  const radius = 30;
+  const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - fraction);
+  const urgent = fraction <= 0.25;
 
-  const colorClass =
-    fraction > 0.5 ? 'text-emerald-400' : fraction > 0.25 ? 'text-yellow-400' : 'text-red-400';
-  const strokeColor =
-    fraction > 0.5 ? '#10b981' : fraction > 0.25 ? '#f59e0b' : '#ef4444';
+  const strokeColor = fraction > 0.5 ? '#c8ff3d' : fraction > 0.25 ? '#ffce4d' : '#ff5468';
+  const textColor =
+    fraction > 0.5 ? 'text-arena-volt' : fraction > 0.25 ? 'text-arena-gold' : 'text-arena-red';
 
   return (
-    <div className={cn('relative flex items-center justify-center', className)}>
-      <svg width="72" height="72" className="-rotate-90">
+    <div
+      className={cn('relative flex items-center justify-center', urgent && 'animate-pulse', className)}
+    >
+      <svg width="80" height="80" className="-rotate-90">
+        <circle cx="40" cy="40" r={radius} fill="none" stroke="#222739" strokeWidth="5" />
         <circle
-          cx="36"
-          cy="36"
-          r="28"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="4"
-          className="text-arena-border"
-        />
-        <circle
-          cx="36"
-          cy="36"
-          r="28"
+          cx="40"
+          cy="40"
+          r={radius}
           fill="none"
           stroke={strokeColor}
-          strokeWidth="4"
+          strokeWidth="5"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
+          style={{
+            transition: 'stroke-dashoffset 1s linear, stroke 0.4s',
+            filter: `drop-shadow(0 0 6px ${strokeColor}80)`,
+          }}
         />
       </svg>
-      <span className={cn('absolute text-xl font-bold tabular-nums', colorClass)}>
+      <span className={cn('absolute font-mono text-2xl font-bold tabular-nums', textColor)}>
         {remaining}
       </span>
     </div>
