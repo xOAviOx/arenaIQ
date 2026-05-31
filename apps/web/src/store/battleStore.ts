@@ -3,6 +3,14 @@ import { QuestionForBattle, QuestionResult, PublicUser, MatchEndPayload } from '
 
 type BattlePhase = 'idle' | 'starting' | 'question' | 'answer_reveal' | 'completed';
 
+export interface ChatMessage {
+  id: string;
+  mine: boolean;
+  username: string;
+  message: string;
+  timestamp: number;
+}
+
 interface BattleState {
   roomId: string | null;
   matchId: string | null;
