@@ -44,8 +44,8 @@ export default function BattlePage() {
 
   if (!opponent || phase === 'idle') {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-arena-bg">
-        <LoadingArena message="Connecting to battle room..." />
+      <main className="flex min-h-screen items-center justify-center">
+        <LoadingArena message="Connecting to battle room…" />
       </main>
     );
   }
@@ -53,19 +53,19 @@ export default function BattlePage() {
   const isLocked = submittedAnswer !== null || phase === 'answer_reveal';
 
   return (
-    <main className="min-h-screen bg-arena-bg">
-      <div className="mx-auto max-w-2xl p-4 pt-6 space-y-4">
+    <main className="min-h-screen">
+      <div className="mx-auto max-w-2xl space-y-4 p-4 pt-6">
         {/* Disconnection warning */}
         {opponentDisconnected && (
-          <div className="flex items-center gap-2 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-2.5 text-sm text-yellow-400">
+          <div className="flex animate-pop-in items-center gap-2 rounded-xl border border-arena-gold/40 bg-arena-gold/10 px-4 py-2.5 text-sm text-arena-gold">
             <WifiOff className="h-4 w-4 shrink-0" />
-            Opponent disconnected — waiting 30s for reconnection...
+            Opponent disconnected — holding the arena for 30s…
           </div>
         )}
 
         {/* Scoreboard */}
         {currentQuestion && (
-          <div className="rounded-2xl border border-arena-border bg-arena-surface p-4">
+          <div className="panel p-4">
             <ScoreBoard
               you={{ username: profile?.username ?? 'You', rating: profile?.rating ?? 1200 }}
               opponent={opponent}
