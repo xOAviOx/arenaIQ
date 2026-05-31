@@ -23,6 +23,15 @@ export interface ReconnectPayload {
   userId: string;
 }
 
+export interface ResignPayload {
+  roomId: string;
+}
+
+export interface SendChatPayload {
+  roomId: string;
+  message: string;
+}
+
 // ── Server → Client ────────────────────────────────────────────
 
 export interface MatchFoundPayload {
