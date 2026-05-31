@@ -20,6 +20,8 @@ export interface PublicUser {
   tier: RatingTier;
   wins: number;
   losses: number;
+  /** True when this opponent is a CPU bot (matched as a fallback). */
+  isBot?: boolean;
 }
 
 export interface Question {
