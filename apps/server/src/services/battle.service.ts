@@ -362,6 +362,9 @@ async function endMatch(io: IoType, roomId: string, forcedWinnerId: string | nul
 
   emitMatchEnd(room.player1.socketId, 'player1');
   emitMatchEnd(room.player2.socketId, 'player2');
+  } finally {
+    onEnd?.();
+  }
 
   // Clean up room after a delay
   setTimeout(() => activeRooms.delete(roomId), 60000);
