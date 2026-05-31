@@ -35,16 +35,15 @@ export default function QueuePage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-arena-bg p-6">
-      <div className="mb-8 flex items-center gap-2">
-        <Swords className="h-7 w-7 text-arena-accent" />
-        <span className="text-xl font-bold text-white">ArenaIQ</span>
+    <main className="flex min-h-screen flex-col items-center justify-center p-6">
+      <div className="stagger mb-10" style={{ ['--i' as string]: 0 }}>
+        <BrandMark size="lg" />
       </div>
 
       <div className="w-full max-w-md">
         {status === 'queuing' && <QueueStatus onCancel={handleCancel} />}
         {status === 'idle' && (
-          <div className="text-center text-slate-400">Initializing matchmaking...</div>
+          <p className="shimmer-text text-center font-mono text-sm">Initializing matchmaking…</p>
         )}
       </div>
 
