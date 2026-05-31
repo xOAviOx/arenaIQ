@@ -51,31 +51,38 @@ export default async function DashboardPage() {
   };
 
   return (
-    <main className="min-h-screen bg-arena-bg">
-      {/* Nav */}
-      <nav className="flex items-center justify-between border-b border-arena-border px-6 py-4">
-        <div className="flex items-center gap-2">
-          <LayoutDashboard className="h-5 w-5 text-arena-accent" />
-          <span className="font-semibold text-white">Dashboard</span>
-        </div>
-        <Link href="/leaderboard" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white">
-          <Trophy className="h-4 w-4" />
-          Leaderboard
+    <main className="min-h-screen">
+      <TopBar>
+        <Link
+          href="/leaderboard"
+          className="flex items-center gap-1.5 rounded-xl border border-arena-line px-3.5 py-2 text-sm text-arena-dim transition-colors hover:border-arena-volt/40 hover:text-arena-text"
+        >
+          <Trophy className="h-4 w-4 text-arena-gold" />
+          <span className="hidden sm:inline">Leaderboard</span>
         </Link>
-      </nav>
+        <UserButton afterSignOutUrl="/" />
+      </TopBar>
 
-      <div className="mx-auto max-w-2xl space-y-6 p-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">
-            Welcome back, <span className="text-arena-accent-light">{profile.username}</span>
+      <div className="mx-auto max-w-2xl space-y-6 px-6 py-10">
+        <div className="stagger" style={{ ['--i' as string]: 0 }}>
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-arena-faint">
+            Command Center
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-arena-text">
+            Welcome back, <span className="text-gradient-volt">{profile.username}</span>
           </h1>
-          <p className="mt-1 text-sm text-slate-400">Ready for your next battle?</p>
+          <p className="mt-1.5 text-sm text-arena-dim">Your opponents are warming up. Are you?</p>
         </div>
 
-        <RatingCard profile={profile} />
+        <div className="stagger" style={{ ['--i' as string]: 1 }}>
+          <RatingCard profile={profile} />
+        </div>
+
         <StatsGrid profile={profile} />
 
-        <FindMatchButton userId={dbUser.id} rating={dbUser.rating} />
+        <div className="stagger" style={{ ['--i' as string]: 2 }}>
+          <FindMatchButton userId={dbUser.id} rating={dbUser.rating} />
+        </div>
       </div>
     </main>
   );
