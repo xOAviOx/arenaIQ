@@ -30,6 +30,7 @@ interface BattleState {
   } | null;
   matchResult: MatchEndPayload | null;
   opponentDisconnected: boolean;
+  messages: ChatMessage[];
 
   // Actions
   initBattle: (roomId: string, opponent: PublicUser) => void;
