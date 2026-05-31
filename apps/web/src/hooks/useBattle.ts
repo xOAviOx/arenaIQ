@@ -9,6 +9,7 @@ import {
   AnswerResultPayload,
   MatchEndPayload,
   SubmitAnswerPayload,
+  ChatMessagePayload,
 } from '@arenaiq/types';
 
 export function useBattle(roomId: string) {
@@ -20,6 +21,7 @@ export function useBattle(roomId: string) {
     setAnswerResult,
     setMatchResult,
     setOpponentDisconnected,
+    addChatMessage,
     submittedAnswer,
     questionIndex,
   } = useBattleStore();
