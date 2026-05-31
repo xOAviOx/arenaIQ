@@ -11,6 +11,7 @@ import {
 import { config } from '../config';
 import { updateRatings } from './rating.service';
 import { getQuestionsForMatch } from './question.service';
+import { pickBotAnswer, botAnswerDelayMs } from './bot.service';
 
 export interface RoomState {
   roomId: string;
