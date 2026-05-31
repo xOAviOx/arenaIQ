@@ -103,6 +103,7 @@ export interface ServerToClientEvents {
   opponent_left: () => void;
   opponent_reconnected: () => void;
   timer_sync: (payload: TimerSyncPayload) => void;
+  chat_message: (payload: ChatMessagePayload) => void;
   error: (message: string) => void;
 }
 
@@ -111,6 +112,8 @@ export interface ClientToServerEvents {
   leave_queue: (payload: LeaveQueuePayload) => void;
   submit_answer: (payload: SubmitAnswerPayload) => void;
   reconnect_battle: (payload: ReconnectPayload) => void;
+  resign: (payload: ResignPayload) => void;
+  send_chat: (payload: SendChatPayload) => void;
 }
 
 export interface InterServerEvents {
