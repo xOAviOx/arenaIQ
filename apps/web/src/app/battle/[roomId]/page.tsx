@@ -10,6 +10,8 @@ import { ScoreBoard } from '@/components/battle/ScoreBoard';
 import { Timer } from '@/components/battle/Timer';
 import { OpponentCard } from '@/components/battle/OpponentCard';
 import { AnswerFeedback } from '@/components/battle/AnswerFeedback';
+import { BattleChat } from '@/components/battle/BattleChat';
+import { ResignButton } from '@/components/battle/ResignButton';
 import { LoadingArena } from '@/components/shared/LoadingArena';
 import { WifiOff } from 'lucide-react';
 
@@ -18,7 +20,7 @@ export default function BattlePage() {
   const router = useRouter();
   const roomId = params.roomId;
 
-  const { submitAnswer } = useBattle(roomId);
+  const { submitAnswer, resign, sendChat } = useBattle(roomId);
 
   const {
     phase,
@@ -32,6 +34,7 @@ export default function BattlePage() {
     lastResult,
     opponent,
     opponentDisconnected,
+    messages,
   } = useBattleStore();
 
   const profile = useUserStore((s) => s.profile);
