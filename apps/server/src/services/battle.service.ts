@@ -333,6 +333,50 @@ async function endMatch(io: IoType, roomId: string, forcedWinnerId: string | nul
   setTimeout(() => activeRooms.delete(roomId), 60000);
 }
 
+/** A player forfeits — their opponent is awarded the win immediately. */
+export function handleResign(io: IoType, roomId: string, userId: string): void {
+  const room = activeRooms.get(roomId);
+  if (!room || room.status === 'completed') return;
+  if (room.player1.userId !== userId && room.player2.userId !== userId) return;
+
+  const opponentId =
+    room.player1.userId === userId ? room.player2.userId : room.player1.userId;
+
+  void endMatch(io, roomId, opponentId);
+}
+
+const MAX_CHAT_LENGTH = 240;
+const CHAT_MIN_INTERVAL_MS = 350;
+const lastChatAt = new Map<string, number>();
+
+/** Relay an in-match chat message to both participants (sender included). */
+export function handleChat(io: IoType, roomId: string, userId: string, raw: string): void {
+  const room = activeRooms.get(roomId);
+  if (!room) return;
+
+  const isPlayer1 = room.player1.userId === userId;
+  const isPlayer2 = room.player2.userId === userId;
+  if (!isPlayer1 && !isPlayer2) return;
+
+  const message = (raw ?? '').replace(/\s+/g, ' ').trim().slice(0, MAX_CHAT_LENGTH);
+  if (!message) return;
+
+  // Lightweight per-user spam throttle.
+  const now = Date.now();
+  const last = lastChatAt.get(userId) ?? 0;
+  if (now - last < CHAT_MIN_INTERVAL_MS) return;
+  lastChatAt.set(userId, now);
+
+  const username = isPlayer1 ? room.player1.username : room.player2.username;
+
+  io.to(roomId).emit('chat_message', {
+    senderId: userId,
+    username,
+    message,
+    timestamp: now,
+  });
+}
+
 export function handleDisconnect(io: IoType, roomId: string, userId: string): void {
   const room = activeRooms.get(roomId);
   if (!room || room.status === 'completed') return;
