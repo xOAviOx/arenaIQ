@@ -670,9 +670,13 @@ async function main() {
   console.log(`Seeded ${questions.length} questions successfully.`);
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+// Only run the seeding side-effect when executed directly (e.g. `db:seed`),
+// not when this module is imported for its `questions` data.
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(() => prisma.$disconnect());
+}
