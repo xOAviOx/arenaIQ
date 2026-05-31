@@ -35,6 +35,11 @@ export function OpponentCard({ opponent, isConnected, hasAnswered, className }: 
       <div className="flex-1 overflow-hidden">
         <div className="flex items-center gap-2">
           <span className="truncate font-semibold text-arena-text">{opponent.username}</span>
+          {opponent.isBot && (
+            <span className="shrink-0 rounded-md border border-arena-cyan/40 bg-arena-cyan/10 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-arena-cyan">
+              Bot
+            </span>
+          )}
           {isConnected ? (
             <Wifi className="h-3.5 w-3.5 shrink-0 text-arena-green" />
           ) : (
