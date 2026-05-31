@@ -263,7 +263,7 @@ async function createAndStartBotMatch(
 }
 
 async function expandRatingWindows(): Promise<void> {
-  const allPlayers = await redis.zrange(QUEUE_KEY, 0, -1);
+  const allPlayers = await redis.zrange<string[]>(QUEUE_KEY, 0, -1);
 
   for (const userId of allPlayers) {
     const entry = await getQueueEntry(userId);
