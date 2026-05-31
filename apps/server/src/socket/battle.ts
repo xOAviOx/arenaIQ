@@ -9,6 +9,8 @@ import {
   handleAnswer,
   handleDisconnect,
   handleReconnect,
+  handleResign,
+  handleChat,
   getRoom,
 } from '../services/battle.service';
 
