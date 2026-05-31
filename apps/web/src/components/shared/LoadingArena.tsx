@@ -7,12 +7,21 @@ interface LoadingArenaProps {
 
 export function LoadingArena({ message = 'Loading...', className }: LoadingArenaProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center gap-4', className)}>
-      <div className="relative h-12 w-12">
-        <div className="absolute inset-0 animate-spin rounded-full border-2 border-arena-accent/20 border-t-arena-accent" />
-        <div className="absolute inset-2 animate-ping rounded-full bg-arena-accent/20" />
+    <div className={cn('flex flex-col items-center justify-center gap-5', className)}>
+      <div className="relative h-16 w-16">
+        {/* outer ping */}
+        <span className="absolute inset-0 animate-ping-slow rounded-full border border-arena-volt/40" />
+        {/* spinning ring */}
+        <span className="absolute inset-0 animate-spin-slow rounded-full border-2 border-arena-line border-t-arena-volt border-r-arena-volt/40" />
+        {/* counter ring */}
+        <span
+          className="absolute inset-2 rounded-full border-2 border-arena-line border-b-arena-cyan"
+          style={{ animation: 'spin 1.8s linear infinite reverse' }}
+        />
+        {/* pulsing core */}
+        <span className="absolute inset-[1.4rem] animate-pulse-glow rounded-full bg-arena-volt/80" />
       </div>
-      <p className="text-sm text-slate-400">{message}</p>
+      <p className="shimmer-text font-mono text-sm tracking-wide">{message}</p>
     </div>
   );
 }
