@@ -32,4 +32,15 @@ export const config = {
     windowExpansionPerStep: 50,
     windowExpansionIntervalMs: 10000,
   },
+
+  // Bot fallback — when a human waits alone with no human opponent, pair them
+  // with a CPU bot so they can still play.
+  bot: {
+    enabled: process.env['BOT_FALLBACK_ENABLED'] !== 'false',
+    // How long a lonely human waits before we hand them a bot.
+    fallbackMs: parseInt(process.env['BOT_FALLBACK_MS'] ?? '8000', 10),
+    // Bot "thinking" time window per question (kept below questionTimeLimit).
+    minAnswerDelayMs: 2500,
+    maxAnswerDelayMs: 14000,
+  },
 } as const;
