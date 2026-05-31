@@ -16,21 +16,30 @@ export function getTier(rating: number): RatingTier {
 }
 
 export const TIER_COLORS: Record<RatingTier, string> = {
-  [RatingTier.GRANDMASTER]: 'text-yellow-400',
-  [RatingTier.MASTER]: 'text-purple-400',
-  [RatingTier.EXPERT]: 'text-blue-400',
-  [RatingTier.SCHOLAR]: 'text-emerald-400',
+  [RatingTier.GRANDMASTER]: 'text-arena-gold',
+  [RatingTier.MASTER]: 'text-fuchsia-400',
+  [RatingTier.EXPERT]: 'text-arena-blue',
+  [RatingTier.SCHOLAR]: 'text-arena-cyan',
   [RatingTier.APPRENTICE]: 'text-slate-300',
-  [RatingTier.BEGINNER]: 'text-slate-400',
+  [RatingTier.BEGINNER]: 'text-arena-faint',
 };
 
 export const TIER_BG: Record<RatingTier, string> = {
-  [RatingTier.GRANDMASTER]: 'bg-yellow-400/10 border-yellow-400/30',
-  [RatingTier.MASTER]: 'bg-purple-400/10 border-purple-400/30',
-  [RatingTier.EXPERT]: 'bg-blue-400/10 border-blue-400/30',
-  [RatingTier.SCHOLAR]: 'bg-emerald-400/10 border-emerald-400/30',
-  [RatingTier.APPRENTICE]: 'bg-slate-400/10 border-slate-400/30',
-  [RatingTier.BEGINNER]: 'bg-slate-600/10 border-slate-600/30',
+  [RatingTier.GRANDMASTER]: 'bg-arena-gold/10 border-arena-gold/30',
+  [RatingTier.MASTER]: 'bg-fuchsia-400/10 border-fuchsia-400/30',
+  [RatingTier.EXPERT]: 'bg-arena-blue/10 border-arena-blue/30',
+  [RatingTier.SCHOLAR]: 'bg-arena-cyan/10 border-arena-cyan/30',
+  [RatingTier.APPRENTICE]: 'bg-slate-300/10 border-slate-300/25',
+  [RatingTier.BEGINNER]: 'bg-arena-faint/10 border-arena-faint/25',
+};
+
+export const TIER_GLOW: Record<RatingTier, string> = {
+  [RatingTier.GRANDMASTER]: 'shadow-[0_0_30px_-8px_rgba(255,206,77,0.6)]',
+  [RatingTier.MASTER]: 'shadow-[0_0_30px_-8px_rgba(232,121,249,0.55)]',
+  [RatingTier.EXPERT]: 'shadow-[0_0_30px_-8px_rgba(91,140,255,0.55)]',
+  [RatingTier.SCHOLAR]: 'shadow-[0_0_30px_-8px_rgba(57,224,255,0.5)]',
+  [RatingTier.APPRENTICE]: 'shadow-[0_0_24px_-10px_rgba(203,213,225,0.4)]',
+  [RatingTier.BEGINNER]: 'shadow-none',
 };
 
 export function formatRatingDelta(delta: number): string {
