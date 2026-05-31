@@ -194,6 +194,73 @@ async function createAndStartMatch(
   }, config.battle.matchStartDelay);
 }
 
+async function createAndStartBotMatch(
+  io: IoType,
+  humanEntry: QueueEntry,
+  bot: BotUser,
+): Promise<void> {
+  const human = await prisma.user.findUnique({ where: { id: humanEntry.userId } });
+  if (!human) {
+    releaseBot(bot.id);
+    return;
+  }
+
+  // The human must still be connected before we spin up a room.
+  const humanSocket = io.sockets.sockets.get(humanEntry.socketId);
+  if (!humanSocket) {
+    releaseBot(bot.id);
+    return;
+  }
+
+  const roomId = await createRoom(
+    io,
+    {
+      userId: human.id,
+      socketId: humanEntry.socketId,
+      username: human.username,
+      rating: human.rating,
+    },
+    {
+      // Bot has no socket — a sentinel id keeps emits to it harmless no-ops.
+      userId: bot.id,
+      socketId: `bot:${bot.id}`,
+      username: bot.username,
+      rating: bot.rating,
+    },
+  );
+
+  // Make the room bot-aware so player2 auto-answers, and free the bot on end.
+  const room = getRoom(roomId);
+  if (room) {
+    room.bot = { userId: bot.id, rating: bot.rating };
+    room.onEnd = () => releaseBot(bot.id);
+  } else {
+    releaseBot(bot.id);
+    return;
+  }
+
+  humanSocket.join(roomId);
+  humanSocket.data.roomId = roomId;
+
+  io.to(humanEntry.socketId).emit('match_found', {
+    roomId,
+    opponent: {
+      id: bot.id,
+      username: bot.username,
+      rating: bot.rating,
+      tier: getRatingTier(bot.rating),
+      wins: bot.wins,
+      losses: bot.losses,
+      isBot: true,
+    },
+    startsIn: config.battle.matchStartDelay,
+  });
+
+  setTimeout(() => {
+    startBattle(io, roomId);
+  }, config.battle.matchStartDelay);
+}
+
 async function expandRatingWindows(): Promise<void> {
   const allPlayers = await redis.zrange(QUEUE_KEY, 0, -1);
 
