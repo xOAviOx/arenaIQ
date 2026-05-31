@@ -17,6 +17,7 @@ export default async function LeaderboardPage() {
     : null;
 
   const topUsers = await prisma.user.findMany({
+    where: { isBot: false },
     orderBy: { rating: 'desc' },
     take: 100,
   });
