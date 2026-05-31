@@ -124,7 +124,7 @@ export function BattleChat({ messages, onSend, opponentName }: BattleChatProps) 
       {/* Toggle */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-13 w-13 items-center justify-center rounded-2xl border border-arena-line bg-arena-panel p-3.5 text-arena-text shadow-panel transition-all hover:-translate-y-0.5 hover:border-arena-volt/50"
+        className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-arena-line bg-arena-panel text-arena-text shadow-panel transition-all hover:-translate-y-0.5 hover:border-arena-volt/50"
         aria-label="Toggle chat"
       >
         <MessageSquare className="h-5 w-5" />
