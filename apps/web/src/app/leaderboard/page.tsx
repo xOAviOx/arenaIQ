@@ -3,8 +3,9 @@ import { currentUser } from '@clerk/nextjs/server';
 import { LeaderboardTable } from '@/components/leaderboard/LeaderboardTable';
 import { LeaderboardEntry, Subject } from '@arenaiq/types';
 import { getTier } from '@/lib/utils';
+import { TopBar } from '@/components/shared/TopBar';
 import Link from 'next/link';
-import { Trophy, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 
 // Always render fresh so standings reflect the latest ratings.
 export const dynamic = 'force-dynamic';
