@@ -25,6 +25,10 @@ export interface RoomState {
   timer: NodeJS.Timeout | null;
   status: 'waiting' | 'in_progress' | 'completed';
   disconnectedPlayers: Map<string, NodeJS.Timeout>;
+  /** Present when player2 is a CPU bot — the bot auto-answers each question. */
+  bot?: { userId: string; rating: number };
+  /** Fired exactly once when the match ends (e.g. to free a reserved bot). */
+  onEnd?: () => void;
 }
 
 const activeRooms = new Map<string, RoomState>();
