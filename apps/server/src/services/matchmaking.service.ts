@@ -66,35 +66,55 @@ export async function dequeuePlayer(userId: string): Promise<void> {
 
 async function runMatchmakingCycle(io: IoType): Promise<void> {
   try {
-    const queueSize = await getQueueSize();
-    if (queueSize < 2) return;
+    // Players sorted by rating (this queue only ever holds humans).
+    const allPlayers = await redis.zrange<string[]>(QUEUE_KEY, 0, -1);
+    if (allPlayers.length === 0) return;
 
-    // Get all players sorted by rating
-    const allPlayers = await redis.zrange(QUEUE_KEY, 0, -1);
     const matched = new Set<string>();
+
+    // ── Pass 1: human vs human ──────────────────────────────────
+    if (allPlayers.length >= 2) {
+      for (const userId of allPlayers) {
+        if (matched.has(userId)) continue;
+
+        const entry = await getQueueEntry(userId);
+        if (!entry) continue;
+
+        const candidates = await getPlayersInRatingRange(entry.rating, entry.ratingWindow);
+        const opponent = candidates.find((c) => c !== userId && !matched.has(c));
+
+        if (!opponent) continue;
+
+        const opponentEntry = await getQueueEntry(opponent);
+        if (!opponentEntry) continue;
+
+        matched.add(userId);
+        matched.add(opponent);
+
+        await Promise.all([removeFromQueue(userId), removeFromQueue(opponent)]);
+
+        await createAndStartMatch(io, entry, opponentEntry);
+      }
+    }
+
+    // ── Pass 2: bot fallback for lonely, long-waiting humans ────
+    if (!config.bot.enabled) return;
+    const now = Date.now();
 
     for (const userId of allPlayers) {
       if (matched.has(userId)) continue;
 
       const entry = await getQueueEntry(userId);
       if (!entry) continue;
+      if (now - entry.joinedAt < config.bot.fallbackMs) continue;
 
-      const candidates = await getPlayersInRatingRange(entry.rating, entry.ratingWindow);
-      const opponent = candidates.find(
-        (c) => c !== userId && !matched.has(c),
-      );
-
-      if (!opponent) continue;
-
-      const opponentEntry = await getQueueEntry(opponent);
-      if (!opponentEntry) continue;
+      const bot = await acquireBot(entry.rating);
+      if (!bot) continue; // every bot busy — retry next cycle
 
       matched.add(userId);
-      matched.add(opponent);
+      await removeFromQueue(userId);
 
-      await Promise.all([removeFromQueue(userId), removeFromQueue(opponent)]);
-
-      await createAndStartMatch(io, entry, opponentEntry);
+      await createAndStartBotMatch(io, entry, bot);
     }
   } catch (err) {
     console.error('Matchmaking cycle error:', err);
