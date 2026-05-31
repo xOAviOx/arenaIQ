@@ -86,12 +86,28 @@ export function useBattle(roomId: string) {
     const onOpponentLeft = () => setOpponentDisconnected(true);
     const onOpponentReconnected = () => setOpponentDisconnected(false);
 
+    const onChatMessage = (payload: ChatMessagePayload) => {
+      // Only two participants — if it isn't the opponent, it's me.
+      const opponentId = useBattleStore.getState().opponent?.id;
+      addChatMessage({
+        id:
+          typeof crypto !== 'undefined' && 'randomUUID' in crypto
+            ? crypto.randomUUID()
+            : `${payload.timestamp}-${Math.random()}`,
+        mine: payload.senderId !== opponentId,
+        username: payload.username,
+        message: payload.message,
+        timestamp: payload.timestamp,
+      });
+    };
+
     socket.on('question_start', onQuestionStart);
     socket.on('answer_result', onAnswerResult);
     socket.on('match_end', onMatchEnd);
     socket.on('opponent_answered', onOpponentAnswered);
     socket.on('opponent_left', onOpponentLeft);
     socket.on('opponent_reconnected', onOpponentReconnected);
+    socket.on('chat_message', onChatMessage);
 
     return () => {
       socket.off('question_start', onQuestionStart);
@@ -100,8 +116,17 @@ export function useBattle(roomId: string) {
       socket.off('opponent_answered', onOpponentAnswered);
       socket.off('opponent_left', onOpponentLeft);
       socket.off('opponent_reconnected', onOpponentReconnected);
+      socket.off('chat_message', onChatMessage);
     };
-  }, [setQuestion, setAnswerResult, setMatchResult, setOpponentAnswered, setOpponentDisconnected, router]);
+  }, [
+    setQuestion,
+    setAnswerResult,
+    setMatchResult,
+    setOpponentAnswered,
+    setOpponentDisconnected,
+    addChatMessage,
+    router,
+  ]);
 
-  return { submitAnswer };
+  return { submitAnswer, resign, sendChat };
 }
