@@ -5,7 +5,7 @@ export const redis = new Redis({
   url: config.redis.url,
   token: config.redis.token,
 });
-
+//
 // Queue key for matchmaking
 export const QUEUE_KEY = 'matchmaking:queue';
 export const QUEUE_ENTRY_TTL = 300; // 5 minutes
