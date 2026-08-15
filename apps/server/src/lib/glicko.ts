@@ -2,6 +2,7 @@
 // Scores: 1 = win, 0.5 = draw, 0 = loss
 //
 //
+//
 interface PlayerRating {
   rating: number;
   rd: number;       // rating deviation
